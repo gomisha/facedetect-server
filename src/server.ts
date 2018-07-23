@@ -5,7 +5,7 @@ import * as config from "./config";
 import User from "./db/user";
 
 import users from "./db/users";
-import { request } from "https";
+import Utility from "./utility";
 
 const app = express();
 
@@ -37,18 +37,23 @@ app.get(config.ENDPOINT_GET_USERS, (request, response) => {
 
 app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
     const {name, email, password} = request.body;
+    const hash = Utility.hashPassword(password);
 
-    let user = new User(name, email, password);
-
+    let user = new User(name, email, hash);
     users.push(user);
-
     response.json(users[users.length-1]);
 })
 
 app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
     const {email, password} = request.body;
 
-    if(email === users[0].email && password === users[0].password) {
+    let filteredUsers = users.filter(user => (user.email === email))
+
+    if(filteredUsers.length < 1) {
+        response.status(400).json("Incorrect user/password");
+    }
+
+    if(email === filteredUsers[0].email && Utility.verifyPassword(password, filteredUsers[0].password)) {
         response.json("Sign in success");
     } else {
         response.status(400).json("Incorrect user/password");
