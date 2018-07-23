@@ -15,6 +15,33 @@ app.listen(3000, ()=> {
     console.log("server running on port 3000");
 })
 
+// ***************** GET REQUESTS **********************************
+
+app.get(config.ENDPOINT_GET_HOME, (request, response) => {
+    response.send("it's working! server listening");
+})
+
+app.get(config.ENDPOINT_GET_PROFILE, (request, response) => {
+    const id = request.params.id;
+    const foundUsers = users.filter(user => {
+        if(user.id === id) {
+            return user;
+        }
+    })
+    if(foundUsers.length < 1 ) {
+        response.status(400).json("No users found with ID22244 " + id);
+    }
+    else {
+        response.json(foundUsers[0]);
+    }
+})
+
+app.get(config.ENDPOINT_GET_USERS, (request, response) => {
+    response.json(users);
+})
+
+// ***************** POST REQUESTS **********************************
+
 app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
     const {name, email, password} = request.body;
 
@@ -28,18 +55,10 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
 app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
     const {email, password} = request.body;
 
-    console.log("email", email);
-    console.log("password", password);
-
     if(email === users[0].email && password === users[0].password) {
         response.json("Sign in success");
     }
     else {
         response.status(400).json("Incorrect user/password");
     }
-})
-
-app.get(config.ENDPOINT_GET_HOME, (request, response) => {
-    // response.send("it's working! server listening");
-    response.json(users);
 })
