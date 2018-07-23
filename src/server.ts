@@ -23,17 +23,10 @@ app.get(config.ENDPOINT_GET_HOME, (request, response) => {
 
 app.get(config.ENDPOINT_GET_PROFILE, (request, response) => {
     const id = request.params.id;
-    const foundUsers = users.filter(user => {
-        if(user.id === id) {
-            return user;
-        }
-    })
-    if(foundUsers.length < 1 ) {
-        response.status(400).json("No users found with ID22244 " + id);
-    }
-    else {
-        response.json(foundUsers[0]);
-    }
+    const foundUsers = users.filter(user => (user.id === id))
+
+    if(foundUsers.length < 1 ) response.status(400).json("No users found with ID: " + id);
+    else                       response.json(foundUsers[0]);
 })
 
 app.get(config.ENDPOINT_GET_USERS, (request, response) => {
@@ -57,8 +50,27 @@ app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
 
     if(email === users[0].email && password === users[0].password) {
         response.json("Sign in success");
-    }
-    else {
+    } else {
         response.status(400).json("Incorrect user/password");
     }
 })
+
+
+// ***************** PUT REQUESTS **********************************
+app.put(config.ENDPOINT_PUT_IMAGE, (request, response) => {
+    const { id } = request.body;
+
+    let filteredUsers = users.filter(user => {
+        if(user.id === id) {
+            user.entries++;
+            return true;
+        }
+    })
+    if(filteredUsers.length < 1) {
+        response.status(400).json("Invalid user ID: " + id);
+    } else {
+        response.json(filteredUsers);
+    }
+})
+
+
