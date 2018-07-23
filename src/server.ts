@@ -1,5 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
+import cors from "cors";
 
 import * as config from "./config";
 import User from "./db/user";
@@ -11,6 +12,9 @@ const app = express();
 
 app.use(bodyParser.json());
 
+// for error: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+app.use(cors());
+
 app.listen(3000, ()=> {
     console.log("server running on port 3000");
 })
@@ -18,7 +22,7 @@ app.listen(3000, ()=> {
 // ***************** GET REQUESTS **********************************
 
 app.get(config.ENDPOINT_GET_HOME, (request, response) => {
-    response.send("it's working! server listening");
+    response.json("it's working! server listening");
 })
 
 app.get(config.ENDPOINT_GET_PROFILE, (request, response) => {
@@ -59,7 +63,6 @@ app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
         response.status(400).json("Incorrect user/password");
     }
 })
-
 
 // ***************** PUT REQUESTS **********************************
 app.put(config.ENDPOINT_PUT_IMAGE, (request, response) => {
