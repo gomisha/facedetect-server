@@ -45,6 +45,7 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
 
     let user = new User(name, email, hash);
     users.push(user);
+
     response.json(users[users.length-1]);
 })
 
@@ -57,8 +58,9 @@ app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
         return response.status(400).json("Incorrect user/password");
     }
 
+    // return logged in user so client can display user profile / info after login
     if(email === filteredUsers[0].email && Utility.verifyPassword(password, filteredUsers[0].password)) {
-        return response.json("Sign in success");
+        return response.json(filteredUsers[0]);
     } else {
         return response.status(400).json("Incorrect user/password");
     }
@@ -77,7 +79,7 @@ app.put(config.ENDPOINT_PUT_IMAGE, (request, response) => {
     if(filteredUsers.length < 1) {
         response.status(400).json("Invalid user ID: " + id);
     } else {
-        response.json(filteredUsers);
+        response.json(filteredUsers[0]);
     }
 })
 
