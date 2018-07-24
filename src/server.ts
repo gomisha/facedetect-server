@@ -54,13 +54,13 @@ app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
     let filteredUsers = users.filter(user => (user.email === email))
 
     if(filteredUsers.length < 1) {
-        response.status(400).json("Incorrect user/password");
+        return response.status(400).json("Incorrect user/password");
     }
 
     if(email === filteredUsers[0].email && Utility.verifyPassword(password, filteredUsers[0].password)) {
-        response.json("Sign in success");
+        return response.json("Sign in success");
     } else {
-        response.status(400).json("Incorrect user/password");
+        return response.status(400).json("Incorrect user/password");
     }
 })
 
