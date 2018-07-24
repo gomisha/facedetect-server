@@ -45,7 +45,6 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
 
     let user = new User(name, email, hash);
     users.push(user);
-
     response.json(users[users.length-1]);
 })
 
@@ -55,6 +54,7 @@ app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
     let filteredUsers = users.filter(user => (user.email === email))
 
     if(filteredUsers.length < 1) {
+
         return response.status(400).json("Incorrect user/password");
     }
 
@@ -82,5 +82,3 @@ app.put(config.ENDPOINT_PUT_IMAGE, (request, response) => {
         response.json(filteredUsers[0]);
     }
 })
-
-
