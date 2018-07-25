@@ -50,14 +50,14 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
     const {name, email, password} = request.body;
     const hash = Utility.hashPassword(password);
 
-    let user = new User(name, email, hash);
+    let user = new User();
+    user.name = name;
+    user.email = email;
+    
     db.addUser(user).then(user => {
         console.log("returned user after register: " + user);
         response.json(user);    
     });
-    //users.push(user);
-    //response.json(users[users.length-1]);
-    //response.json(dbUser);
 })
 
 app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {

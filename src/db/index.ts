@@ -22,15 +22,7 @@ export default class DB {
         this.connection = knex({
             client: 'pg',
             connection
-            // connection: {
-            //   host : '127.0.0.1',
-            //   user : 'your_database_user',
-            //   password : 'your_database_password',
-            //   database : 'myapp_test'
         })
-
-
-        //this.connection.select('*').from('fd_users').then(this.processData);
     }
 
     public addUser(user: User) {
@@ -48,12 +40,12 @@ export default class DB {
     }
 
     private onUserInsert(users: any): User {
-        let newUser = new User(users[0].name, users[0].email, "");
+        let newUser = new User();
+        newUser.name = users[0].name;
+        newUser.email = users[0].email;
         newUser.joined = users[0].joined;
         newUser.id = users[0].id;
         newUser.entries = users[0].entries;
         return newUser;
     }
 }
-
-//pg Desktop Runtime service
