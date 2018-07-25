@@ -1,6 +1,8 @@
+// 3rd party libs
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+
 
 import * as config from "./config";
 import User from "./db/user";
@@ -8,9 +10,14 @@ import User from "./db/user";
 import users from "./db/users";
 import Utility from "./utility";
 
+import DB from "./db/index";
+
 const app = express();
 
 app.use(bodyParser.json());
+
+let db = new DB();
+db.connect();
 
 // for error: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 app.use(cors());
@@ -44,8 +51,13 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
     const hash = Utility.hashPassword(password);
 
     let user = new User(name, email, hash);
-    users.push(user);
-    response.json(users[users.length-1]);
+    db.addUser(user).then(user => {
+        console.log("returned user after register: " + user);
+        response.json(user);    
+    });
+    //users.push(user);
+    //response.json(users[users.length-1]);
+    //response.json(dbUser);
 })
 
 app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
