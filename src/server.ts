@@ -3,11 +3,10 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 
-
 import * as config from "./config";
 import User from "./db/user";
 
-import users from "./db/users";
+import users_to_delete from "./db/users";
 import Utility from "./utility";
 
 import DB from "./db/index";
@@ -42,7 +41,9 @@ app.get(config.ENDPOINT_GET_PROFILE, (request, response) => {
 })
 
 app.get(config.ENDPOINT_GET_USERS, (request, response) => {
-    response.json(users);
+    db.getUsers().then(users => {
+        response.json(users);
+    }).catch(error => response.status(400).json(error))
 })
 
 // ***************** POST REQUESTS **********************************
@@ -65,7 +66,7 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
 app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
     const {email, password} = request.body;
 
-    let filteredUsers = users.filter(user => (user.email === email))
+    let filteredUsers = users_to_delete.filter(user => (user.email === email))
 
     if(filteredUsers.length < 1) {
 

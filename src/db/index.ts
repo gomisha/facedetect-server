@@ -15,7 +15,7 @@ export default class DB {
 
     // ***************** PUBLIC ******************************
 
-    public addUser(user: User) {
+    public addUser(user: User): Promise<User> {
         return new Promise<User>((resolve, reject) => {
             this.connection(config.DB_TABLE_USER)
                 .returning("*")
@@ -28,7 +28,7 @@ export default class DB {
         })
     }
 
-    public getUser(id: string) {
+    public getUser(id: string):Promise<User> {
         return new Promise<User>((resolve, reject) => {
             this.connection(config.DB_TABLE_USER).where("id", id)
                 .then((users: User []) => resolve(this.onUserReturned(users)))
@@ -36,7 +36,18 @@ export default class DB {
         })
     }
 
-    public updateUser(id: string) {
+    public getUsers():Promise<User []> {
+        return new Promise<User []>((resolve, reject) => {
+            this.connection.select().table(config.DB_TABLE_USER)
+                .then((users: User []) => {
+                    if(users) { resolve(users) }
+                    else      { reject("error getting users") }
+                })
+                .catch((error: any) => reject(error))
+        })
+    }
+
+    public updateUser(id: string): Promise<number> {
         return new Promise<number>((resolve, reject) => {
             this.connection(config.DB_TABLE_USER)
                 .where("id", "=", id)
