@@ -83,16 +83,7 @@ app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
 // ***************** PUT REQUESTS **********************************
 app.put(config.ENDPOINT_PUT_IMAGE, (request, response) => {
     const { id } = request.body;
-
-    let filteredUsers = users.filter(user => {
-        if(user.id === id) {
-            user.entries++;
-            return true;
-        }
-    })
-    if(filteredUsers.length < 1) {
-        response.status(400).json("Invalid user ID: " + id);
-    } else {
-        response.json(filteredUsers[0]);
-    }
+    db.updateUser(id).then(entries => {
+        response.json(entries);
+    }).catch(error => response.status(400).json(error))
 })

@@ -23,7 +23,7 @@ export default class DB {
                     name: user.name,
                     email: user.email,
                     joined: new Date()})
-                .then((users: any) => resolve(this.onUserReturned(users)))
+                .then((users: User []) => resolve(this.onUserReturned(users)))
                 .catch((error:any) => reject(error));
         })
     }
@@ -31,7 +31,21 @@ export default class DB {
     public getUser(id: string) {
         return new Promise<User>((resolve, reject) => {
             this.connection(config.DB_TABLE_USER).where("id", id)
-                .then((users: any) => resolve(this.onUserReturned(users)))
+                .then((users: User []) => resolve(this.onUserReturned(users)))
+                .catch((error: any) => reject(error))
+        })
+    }
+
+    public updateUser(id: string) {
+        return new Promise<number>((resolve, reject) => {
+            this.connection(config.DB_TABLE_USER)
+                .where("id", "=", id)
+                .increment("entries", 1)
+                .returning("entries")
+                .then((entries: number) => {
+                    if(entries > 0) { resolve(entries); }
+                    else { reject("Error updating entries for id " + id)}
+                })
                 .catch((error: any) => reject(error))
         })
     }
@@ -52,7 +66,6 @@ export default class DB {
     }
 
     private onUserReturned(users: any): User {
-        console.log("onUserReturned>users: ", users);
         let newUser = new User();
         newUser.name = users[0].name;
         newUser.email = users[0].email;
