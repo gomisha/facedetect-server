@@ -1,6 +1,7 @@
 import knex from "knex";
 
 import IConnection from "./IConnection";
+import * as config from "./config_db";
 
 import User from "./user";
 import { resolve } from "url";
@@ -13,10 +14,10 @@ export default class DB {
 
     connect():void {
         let connection: IConnection = {
-            host: "stampy.db.elephantsql.com",
-            user: "niqdgsog",
-            password: "pVthToA_yOX2i7QS4ndFIzHL7hILRu08",
-            database: "niqdgsog"
+            host: config.DB_HOST,
+            user: config.DB_USER,
+            password: config.DB_PASSWORD,
+            database: config.DB_DATABASE
         };
 
         this.connection = knex({
@@ -27,7 +28,7 @@ export default class DB {
 
     public addUser(user: User) {
         return new Promise<User>((resolve, reject) => {
-            this.connection('fd_users')
+            this.connection(config.DB_TABLE_USER)
             .returning("*")
             .insert({
                 name: user.name,
@@ -38,6 +39,12 @@ export default class DB {
             }).catch((error:any) => {
                 reject(error);
             });
+        })
+    }
+
+    public getUser(id: string) {
+        return new Promise<User>((resolve, reject) => {
+            this.connection('')
         })
     }
 

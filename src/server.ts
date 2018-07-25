@@ -34,6 +34,7 @@ app.get(config.ENDPOINT_GET_HOME, (request, response) => {
 
 app.get(config.ENDPOINT_GET_PROFILE, (request, response) => {
     const id = request.params.id;
+    
     const foundUsers = users.filter(user => (user.id === id))
 
     if(foundUsers.length < 1 ) response.status(400).json("No users found with ID: " + id);
