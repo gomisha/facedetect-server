@@ -55,8 +55,9 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
     user.email = email;
     
     db.addUser(user).then(user => {
-        console.log("returned user after register: " + user);
         response.json(user);    
+    }).catch(error => {
+        response.status(400).json("error registering user");
     });
 })
 

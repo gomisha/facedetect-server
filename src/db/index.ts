@@ -35,6 +35,8 @@ export default class DB {
                 joined: new Date()
             }).then((users: any) => {
                 resolve(this.onUserInsert(users));
+            }).catch((error:any) => {
+                reject(error);
             });
         })
     }
