@@ -17,7 +17,6 @@ const app = express();
 app.use(bodyParser.json());
 
 let db = new DB();
-db.connect();
 
 // for error: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 app.use(cors());
@@ -34,11 +33,12 @@ app.get(config.ENDPOINT_GET_HOME, (request, response) => {
 
 app.get(config.ENDPOINT_GET_PROFILE, (request, response) => {
     const id = request.params.id;
-    
-    const foundUsers = users.filter(user => (user.id === id))
 
-    if(foundUsers.length < 1 ) response.status(400).json("No users found with ID: " + id);
-    else                       response.json(foundUsers[0]);
+    db.getUser(id).then(user => {
+        response.json(user);
+    }).catch(error => {
+        response.status(400).json("error finding user with id " + id);
+    })
 })
 
 app.get(config.ENDPOINT_GET_USERS, (request, response) => {

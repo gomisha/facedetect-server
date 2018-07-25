@@ -10,9 +10,34 @@ export default class DB {
     private connection: any;
 
     constructor() {
+        this.connect();
     }
 
-    connect():void {
+    // ***************** PUBLIC ******************************
+
+    public addUser(user: User) {
+        return new Promise<User>((resolve, reject) => {
+            this.connection(config.DB_TABLE_USER)
+                .returning("*")
+                .insert({
+                    name: user.name,
+                    email: user.email,
+                    joined: new Date()})
+                .then((users: any) => resolve(this.onUserReturned(users)))
+                .catch((error:any) => reject(error));
+        })
+    }
+
+    public getUser(id: string) {
+        return new Promise<User>((resolve, reject) => {
+            this.connection(config.DB_TABLE_USER).where("id", id)
+                .then((users: any) => resolve(this.onUserReturned(users)))
+                .catch((error: any) => reject(error))
+        })
+    }
+
+    // ***************** PRIVATE ******************************
+    private connect():void {
         let connection: IConnection = {
             host: config.DB_HOST,
             user: config.DB_USER,
@@ -26,29 +51,8 @@ export default class DB {
         })
     }
 
-    public addUser(user: User) {
-        return new Promise<User>((resolve, reject) => {
-            this.connection(config.DB_TABLE_USER)
-            .returning("*")
-            .insert({
-                name: user.name,
-                email: user.email,
-                joined: new Date()
-            }).then((users: any) => {
-                resolve(this.onUserInsert(users));
-            }).catch((error:any) => {
-                reject(error);
-            });
-        })
-    }
-
-    public getUser(id: string) {
-        return new Promise<User>((resolve, reject) => {
-            this.connection('')
-        })
-    }
-
-    private onUserInsert(users: any): User {
+    private onUserReturned(users: any): User {
+        console.log("onUserReturned>users: ", users);
         let newUser = new User();
         newUser.name = users[0].name;
         newUser.email = users[0].email;
