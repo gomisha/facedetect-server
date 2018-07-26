@@ -4,39 +4,74 @@ import IConnection from "./IConnection";
 import * as config from "./config_db";
 
 import User from "./user";
-import { resolve } from "url";
 
 export default class DB {
-    private connection: any;
+    private connection: knex;
 
     constructor() {
-        this.connect();
+        this.connection = this.connect();
     }
 
     // ***************** PUBLIC ******************************
 
-    public addLogin(email: string, hash: string): Promise<boolean> {
-        return new Promise<boolean>((resolve, reject) => {
-            this.connection(config.DB_TABLE_LOGIN)
+    public async addLogin(email: string, hash: string): Promise<void> {
+        try {
+            await this.connection(config.DB_TABLE_LOGIN)
                 .insert({ 
                     email,
-                    hash})
-                .then(() => resolve(true))
-                .catch((error: any) => reject("error adding login for email: " + email))
-        })
+                    hash});
+        }
+        catch(error) { return Promise.reject("error adding login for email: " + email) }
     }
 
-    public addUser(user: User): Promise<User> {
-        return new Promise<User>((resolve, reject) => {
-            this.connection(config.DB_TABLE_USER)
+    /** Create a DB transaction around 1) creating user record 2) create login record */
+    public registerUser(user: User, hash: string): User {
+        console.log("registerUser>1")
+//        return new Promise<User>((resolve, reject) => {
+            console.log("registerUser>2")
+//             this.connection.transaction(trx => {
+//                 console.log("registerUser>3")
+//                 this.addUser(user, trx) 
+//                     .then(()=> {
+//                         console.log("registerUser>4")
+//                        // return this.addLogin(user.email, hash, trx)
+//                         console.log("registerUser>5")
+//                     })
+//                     // .then(()=> {
+//                     //     console.log("registerUser>6")
+//                     //     return;
+//                     //     // resolve(user);
+//                     // })
+//                     .catch(error => {
+//                         console.log("registerUser>7")
+//                         // reject("error registering user")
+//                     })
+//             })
+//             .then(() => {
+//                 console.log("registerUser>8")
+//                 console.log("registerUser>transaction completed")
+//                 // resolve(user)
+//             })
+//             .catch(error => {
+//                 console.log("registerUser>9")
+//                 console.log("registerUser>error: " + error)
+//                 // reject("error registering user")
+//             })
+// //        })
+            return new User();
+    }
+
+    public async addUser(user: User): Promise<User> {
+        try {
+            let users: User [] = await this.connection(config.DB_TABLE_USER)
                 .returning("*")
                 .insert({
                     name: user.name,
                     email: user.email,
-                    joined: new Date()})
-                .then((users: User []) => resolve(this.onUserReturned(users)))
-                .catch((error:any) => reject("Error adding user"));
-        })
+                    joined: new Date()});
+            return Promise.resolve(users[0]);
+        }
+        catch(error) { return Promise.reject("Error adding user"); }
     }
 
     public getPassword(email: string):Promise<string> {
@@ -94,7 +129,7 @@ export default class DB {
     }
 
     // ***************** PRIVATE ******************************
-    private connect():void {
+    private connect():knex {
         let connection: IConnection = {
             host: config.DB_HOST,
             user: config.DB_USER,
@@ -102,7 +137,7 @@ export default class DB {
             database: config.DB_DATABASE
         };
 
-        this.connection = knex({
+        return knex({
             client: 'pg',
             connection
         })

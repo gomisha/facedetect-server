@@ -81,7 +81,7 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
 
 async function addUserAsync(user: User, hash: string): Promise<User> {
     let addedUser = await db.addUser(user);
-    let isLoginCreated = await db.addLogin(addedUser.email, hash);
+    await db.addLogin(addedUser.email, hash);
 
     return addedUser;
 }
