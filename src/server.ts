@@ -6,7 +6,6 @@ import cors from "cors";
 import * as config from "./config";
 import User from "./db/user";
 
-import users_to_delete from "./db/users";
 import Utility from "./utility";
 
 import DB from "./db/index";
@@ -33,7 +32,7 @@ app.get(config.ENDPOINT_GET_HOME, (request, response) => {
 app.get(config.ENDPOINT_GET_PROFILE, (request, response) => {
     const id = request.params.id;
 
-    db.getUser(id).then(user => {
+    db.getUserById(id).then(user => {
         response.json(user);
     }).catch(error => {
         response.status(400).json("error finding user with id " + id);
@@ -56,29 +55,27 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
     user.name = name;
     user.email = email;
     
-    db.addUser(user).then(user => {
-        response.json(user);    
-    }).catch(error => {
-        response.status(400).json("error registering user");
-    });
+    db.addUser(user)
+        .then(user => {
+            //after user created, now create login record
+            db.addLogin(email, hash)
+                .then(isLoginCreated => response.json(user))})
+        .catch(error => response.status(400).json(error));
 })
 
 app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
     const {email, password} = request.body;
-
-    let filteredUsers = users_to_delete.filter(user => (user.email === email))
-
-    if(filteredUsers.length < 1) {
-
-        return response.status(400).json("Incorrect user/password");
-    }
-
-    // return logged in user so client can display user profile / info after login
-    if(email === filteredUsers[0].email && Utility.verifyPassword(password, filteredUsers[0].password)) {
-        return response.json(filteredUsers[0]);
-    } else {
-        return response.status(400).json("Incorrect user/password");
-    }
+    db.getPassword(email)
+        .then(hash => {
+            console.log("hash1", hash);
+            if(!Utility.verifyPassword(password, hash)) {
+                throw new Error("Incorrect user/password2");
+            }
+            //after authenticate, retrieve user info
+            db.getUserByEmail(email)
+                .then(user => response.json(user))
+        })
+        .catch(error => response.status(400).json("" + error));
 })
 
 // ***************** PUT REQUESTS **********************************

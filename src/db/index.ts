@@ -15,6 +15,17 @@ export default class DB {
 
     // ***************** PUBLIC ******************************
 
+    public addLogin(email: string, hash: string): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            this.connection(config.DB_TABLE_LOGIN)
+                .insert({ 
+                    email,
+                    hash})
+                .then(() => resolve(true))
+                .catch((error: any) => reject("error adding login for email: " + email))
+        })
+    }
+
     public addUser(user: User): Promise<User> {
         return new Promise<User>((resolve, reject) => {
             this.connection(config.DB_TABLE_USER)
@@ -24,13 +35,34 @@ export default class DB {
                     email: user.email,
                     joined: new Date()})
                 .then((users: User []) => resolve(this.onUserReturned(users)))
-                .catch((error:any) => reject(error));
+                .catch((error:any) => reject("Error adding user"));
         })
     }
 
-    public getUser(id: string):Promise<User> {
+    public getPassword(email: string):Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            this.connection(config.DB_TABLE_LOGIN).where("email", email)
+                .then((logins: any) => {
+                    console.log("logins.length", logins.length);
+                    if(logins.length !== 1) { throw new Error("Incorrect user/password1") }
+                    console.log("getPassword1", logins)
+                    resolve(logins[0].hash)
+                })
+                .catch((error: any) => reject(error))
+        })
+    }
+
+    public getUserById(id: string):Promise<User> {
         return new Promise<User>((resolve, reject) => {
             this.connection(config.DB_TABLE_USER).where("id", id)
+                .then((users: User []) => resolve(this.onUserReturned(users)))
+                .catch((error: any) => reject(error))
+        })
+    }
+
+    public getUserByEmail(email: string): Promise<User> {
+        return new Promise<User>((resolve, reject) => {
+            this.connection(config.DB_TABLE_USER).where("email", email)
                 .then((users: User []) => resolve(this.onUserReturned(users)))
                 .catch((error: any) => reject(error))
         })

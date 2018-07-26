@@ -1,3 +1,4 @@
+export const DB_TABLE_LOGIN = "fd_login";
 export const DB_TABLE_USER = "fd_users";
 
 export const DB_HOST = "stampy.db.elephantsql.com";
