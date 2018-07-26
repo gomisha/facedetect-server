@@ -15,13 +15,13 @@ export default class DB {
     // ***************** PUBLIC ******************************
 
     public async addLogin(email: string, hash: string): Promise<void> {
-        try {
-            await this.connection(config.DB_TABLE_LOGIN)
-                .insert({ 
-                    email,
-                    hash});
-        }
-        catch(error) { return Promise.reject("error adding login for email: " + email) }
+        this.connection.transaction((trx: knex.Transaction) => {
+            trx.insert({
+                email,
+                hash
+            }).into(config.DB_TABLE_LOGIN).returning("email")
+            .then(trx.commit).catch(trx.rollback)
+        })
     }
 
     /** Create a DB transaction around 1) creating user record 2) create login record */
@@ -63,6 +63,25 @@ export default class DB {
 
     public async addUser(user: User): Promise<User> {
         try {
+
+            // this.connection.transaction((trx: knex.Transaction) => {
+            //     trx(config.DB_TABLE_USER)
+            //         .insert({
+            //             name: user.name,
+            //             email: user.email,
+            //             joined: new Date()})
+            //         .returning("*")
+
+
+            // }).then
+
+
+
+            // //return Promise.resolve(usersTx[0])
+            // await this.connection.transaction((trx: knex.Transaction) => {
+
+            // })
+
             let users: User [] = await this.connection(config.DB_TABLE_USER)
                 .returning("*")
                 .insert({
@@ -71,7 +90,7 @@ export default class DB {
                     joined: new Date()});
             return Promise.resolve(users[0]);
         }
-        catch(error) { return Promise.reject("Error adding user") }
+        catch(error) { return Promise.reject("Error adding user: " + error) }
     }
 
     public async getPassword(email: string):Promise<string> {
