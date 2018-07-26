@@ -90,7 +90,6 @@ app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
     const {email, password} = request.body;
     db.getPassword(email)
         .then(hash => {
-            console.log("hash1", hash);
             if(!Utility.verifyPassword(password, hash)) {
                 throw new Error("Incorrect user/password2");
             }

@@ -71,61 +71,54 @@ export default class DB {
                     joined: new Date()});
             return Promise.resolve(users[0]);
         }
-        catch(error) { return Promise.reject("Error adding user"); }
+        catch(error) { return Promise.reject("Error adding user") }
     }
 
-    public getPassword(email: string):Promise<string> {
-        return new Promise<string>((resolve, reject) => {
-            this.connection(config.DB_TABLE_LOGIN).where("email", email)
-                .then((logins: any) => {
-                    console.log("logins.length", logins.length);
-                    if(logins.length !== 1) { throw new Error("Incorrect user/password1") }
-                    console.log("getPassword1", logins)
-                    resolve(logins[0].hash)
-                })
-                .catch((error: any) => reject(error))
-        })
+    public async getPassword(email: string):Promise<string> {
+        try {
+            let logins = await this.connection(config.DB_TABLE_LOGIN).where("email", email);
+            if(logins.length !== 1) { throw new Error("Incorrect user/password1.1") }
+            return Promise.resolve(logins[0].hash)
+        }
+        catch(error) { return Promise.reject("Incorrect user/password1.2") }
     }
 
-    public getUserById(id: string):Promise<User> {
-        return new Promise<User>((resolve, reject) => {
-            this.connection(config.DB_TABLE_USER).where("id", id)
-                .then((users: User []) => resolve(this.onUserReturned(users)))
-                .catch((error: any) => reject(error))
-        })
+    public async getUserById(id: string):Promise<User> {
+        try {
+            let users: User [] = await this.connection(config.DB_TABLE_USER).where("id", id);
+            if(users.length != 1) throw new Error("invalid # of users returned: " + users.length)
+            return Promise.resolve(users[0]);
+        }
+        catch(error) { return Promise.reject("error getting user id: " + error) }
     }
 
-    public getUserByEmail(email: string): Promise<User> {
-        return new Promise<User>((resolve, reject) => {
-            this.connection(config.DB_TABLE_USER).where("email", email)
-                .then((users: User []) => resolve(this.onUserReturned(users)))
-                .catch((error: any) => reject(error))
-        })
+    public async getUserByEmail(email: string): Promise<User> {
+        try {
+            let users: User [] = await this.connection(config.DB_TABLE_USER).where("email", email)
+            if(users.length != 1) throw new Error("Invalid # of users returned")
+            return Promise.resolve(users[0])
+        }
+        catch(error) { return Promise.reject(error) }
     }
 
-    public getUsers():Promise<User []> {
-        return new Promise<User []>((resolve, reject) => {
-            this.connection.select().table(config.DB_TABLE_USER)
-                .then((users: User []) => {
-                    if(users) { resolve(users) }
-                    else      { reject("error getting users") }
-                })
-                .catch((error: any) => reject(error))
-        })
+    public async getUsers():Promise<User []> {
+        try {
+            let users: User [] = await this.connection.select().table(config.DB_TABLE_USER)
+            return Promise.resolve(users)
+        }
+        catch(error) { return Promise.reject(error) }
     }
 
-    public updateUser(id: string): Promise<number> {
-        return new Promise<number>((resolve, reject) => {
-            this.connection(config.DB_TABLE_USER)
+    public async updateUser(id: string): Promise<number> {
+        try {
+            let entries: number = await this.connection(config.DB_TABLE_USER)
                 .where("id", "=", id)
                 .increment("entries", 1)
                 .returning("entries")
-                .then((entries: number) => {
-                    if(entries > 0) { resolve(entries); }
-                    else { reject("Error updating entries for id " + id)}
-                })
-                .catch((error: any) => reject(error))
-        })
+            if(entries > 0) { return Promise.resolve(entries) }
+            return Promise.reject("wrong number of entries: " + entries)
+        }
+        catch(error) { return Promise.reject("error updating user with id: " + id)}
     }
 
     // ***************** PRIVATE ******************************
@@ -141,15 +134,5 @@ export default class DB {
             client: 'pg',
             connection
         })
-    }
-
-    private onUserReturned(users: any): User {
-        let newUser = new User();
-        newUser.name = users[0].name;
-        newUser.email = users[0].email;
-        newUser.joined = users[0].joined;
-        newUser.id = users[0].id;
-        newUser.entries = users[0].entries;
-        return newUser;
     }
 }
