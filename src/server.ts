@@ -54,14 +54,29 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
     let user = new User();
     user.name = name;
     user.email = email;
-    
+
+    // try {
+    //     let registeredUser = db.registerUser(user, hash)
+    //     response.json(registeredUser)
+    //     // .then(user => response.json(user))
+    //     // .catch(error => response.status(400).json("" + error))
+    // }
+    // catch(error) { response.status(400).json("" + error) }
+
+    //working
+    // db.addUser(user)
+    //     .then(user => {
+    //         //after user created, now create login record
+    //         db.addLogin(email, hash)
+    //             .then(isLoginCreated => response.json(user))})
+    //     .catch(error => response.status(400).json(error));
+
     db.addUser(user)
-        .then(user => {
-            //after user created, now create login record
-            db.addLogin(email, hash)
-                .then(isLoginCreated => response.json(user))})
+        //after user created, now create login record
+        .then(user => db.addLogin(email, hash))
+        .then(isLoginCreated => response.json(user))
         .catch(error => response.status(400).json(error));
-})
+    })
 
 app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
     const {email, password} = request.body;
