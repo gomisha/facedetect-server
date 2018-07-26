@@ -55,15 +55,7 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
     user.name = name;
     user.email = email;
 
-    // try {
-    //     let registeredUser = db.registerUser(user, hash)
-    //     response.json(registeredUser)
-    //     // .then(user => response.json(user))
-    //     // .catch(error => response.status(400).json("" + error))
-    // }
-    // catch(error) { response.status(400).json("" + error) }
-
-    //working
+    //working - nested then()
     // db.addUser(user)
     //     .then(user => {
     //         //after user created, now create login record
@@ -71,12 +63,28 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
     //             .then(isLoginCreated => response.json(user))})
     //     .catch(error => response.status(400).json(error));
 
-    db.addUser(user)
-        //after user created, now create login record
-        .then(user => db.addLogin(email, hash))
-        .then(isLoginCreated => response.json(user))
+    //let addedUser = db.addUser(user);
+
+    //working - flat then
+    // db.addUser(user)
+    //     //after user created, now create login record
+    //     .then(user => db.addLogin(email, hash))
+    //     .then(isLoginCreated => response.json(user))
+    //     .catch(error => response.status(400).json(error));
+
+    //working - async function
+    addUserAsync(user, hash)
+        .then(addedUser => response.json(addedUser))
         .catch(error => response.status(400).json(error));
-    })
+    
+})
+
+async function addUserAsync(user: User, hash: string): Promise<User> {
+    let addedUser = await db.addUser(user);
+    let isLoginCreated = await db.addLogin(addedUser.email, hash);
+
+    return addedUser;
+}
 
 app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
     const {email, password} = request.body;
