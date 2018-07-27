@@ -16,7 +16,7 @@ export default class DB {
 
     public async addLogin(email: string, hash: string): Promise<void> {
         this.connection.transaction((trx: knex.Transaction) => {
-            trx.insert({
+            return trx.insert({
                 email,
                 hash
             }).into(config.DB_TABLE_LOGIN).returning("email")
@@ -62,35 +62,26 @@ export default class DB {
     }
 
     public async addUser(user: User): Promise<User> {
+
+        //https://stackoverflow.com/a/40852008/5719544
+        //transform knex transaction such that can be used with async-await
+        const promisify = (fn: any) => new Promise((resolve, reject) => fn(resolve));
+        const trx: any = await promisify(this.connection.transaction);
+
         try {
-
-            // this.connection.transaction((trx: knex.Transaction) => {
-            //     trx(config.DB_TABLE_USER)
-            //         .insert({
-            //             name: user.name,
-            //             email: user.email,
-            //             joined: new Date()})
-            //         .returning("*")
-
-
-            // }).then
-
-
-
-            // //return Promise.resolve(usersTx[0])
-            // await this.connection.transaction((trx: knex.Transaction) => {
-
-            // })
-
-            let users: User [] = await this.connection(config.DB_TABLE_USER)
-                .returning("*")
-                .insert({
-                    name: user.name,
-                    email: user.email,
-                    joined: new Date()});
+            let users: User [] = await trx.insert({
+                name: user.name,
+                email: user.email,
+                joined: new Date()})
+            .into(config.DB_TABLE_USER)
+            .returning("*")
+            await trx.commit();
             return Promise.resolve(users[0]);
         }
-        catch(error) { return Promise.reject("Error adding user: " + error) }
+        catch(error) { 
+            await trx.rollback;
+            return Promise.reject("Error adding user: " + error) 
+        }
     }
 
     public async getPassword(email: string):Promise<string> {
