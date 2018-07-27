@@ -2,6 +2,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+const Clarifai = require('clarifai');
 
 import * as config from "./config";
 import User from "./db/user";
@@ -14,8 +15,11 @@ const app = express();
 
 app.use(bodyParser.json());
 
-
 let db = new DB();
+
+const clarify = new Clarifai.App({
+    apiKey: config.CLARIFAI_KEY
+});
 
 // for error: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 app.use(cors());
@@ -85,8 +89,20 @@ app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
 
 // ***************** PUT REQUESTS **********************************
 app.put(config.ENDPOINT_PUT_IMAGE, (request, response) => {
-    const { id } = request.body;
-    db.updateUser(id).then(entries => {
-        response.json(entries);
-    }).catch(error => response.status(400).json(error))
+    const { id, imageURL } = request.body
+
+    const responseBody = {
+        entries: 0,
+        data: {}
+    }
+
+    clarify.models.predict(Clarifai.FACE_DETECT_MODEL, imageURL)
+        .then((response: any) => {
+            if(!response) { throw new Error("error getting face from Clarifai") }
+            responseBody.data = response
+            return db.updateUser(id)  //update user's stats after fetched face
+        }).then((entries: number) => {
+            responseBody.entries = entries
+            return response.json(responseBody)
+        }).catch((error: Error) => response.status(400).json("error: " + error))
 })
