@@ -52,6 +52,10 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
     const {name, email, password} = request.body;
     const hash = Utility.hashPassword(password);
 
+    if(!name || !email || !password) {
+        return response.status(400).json("Invalid data for registering")
+    }
+
     let user = new User();
     user.name = name;
     user.email = email;
@@ -63,6 +67,11 @@ app.post(config.ENDPOINT_POST_REGISTER, (request, response) => {
 
 app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
     const {email, password} = request.body;
+
+    if(!email || !password) {
+        return response.status(400).json("Invalid data for sign in")
+    }
+
     db.getPassword(email)
         .then(hash => {
             if(!Utility.verifyPassword(password, hash)) {
@@ -71,8 +80,7 @@ app.post(config.ENDPOINT_POST_SIGNIN, (request, response) => {
             //after authenticate, retrieve user info
             db.getUserByEmail(email)
                 .then(user => response.json(user))
-        })
-        .catch(error => response.status(400).json("" + error));
+        }).catch(error => response.status(400).json("" + error));
 })
 
 // ***************** PUT REQUESTS **********************************
