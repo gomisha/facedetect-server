@@ -17,6 +17,7 @@
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "knex": "^0.15.2",
+    "nodemon": "^1.18.3",
     "pg": "^7.4.3",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.14.0"
