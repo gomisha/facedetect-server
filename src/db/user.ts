@@ -2,16 +2,14 @@ export default class User {
     id: string;
     name: string;
     email: string;
-    password: string;
-    joined: Date;
+    joined: Date | string;
     entries: number;
 
-    constructor(name: string, email: string, password: string) {
-        this.id = "" + new Date().getMilliseconds();
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.joined = new Date();
+    constructor() {
+        this.id = "";
+        this.name = "";
+        this.email = "";
+        this.joined = "";
         this.entries = 0;
     }
 }
