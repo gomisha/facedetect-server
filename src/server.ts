@@ -14,6 +14,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
+
 let db = new DB();
 
 // for error: No 'Access-Control-Allow-Origin' header is present on the requested resource.
