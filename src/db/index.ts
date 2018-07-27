@@ -14,16 +14,6 @@ export default class DB {
 
     // ***************** PUBLIC ******************************
 
-    public async addLogin(email: string, hash: string): Promise<void> {
-        this.connection.transaction((trx: knex.Transaction) => {
-            return trx.insert({
-                email,
-                hash
-            }).into(config.DB_TABLE_LOGIN).returning("email")
-            .then(trx.commit).catch(trx.rollback)
-        })
-    }
-
     /** Creates a DB transaction around:
      *  1) creating user record 
      *  2) create login record 
