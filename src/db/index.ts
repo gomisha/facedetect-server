@@ -24,57 +24,32 @@ export default class DB {
         })
     }
 
-    /** Create a DB transaction around 1) creating user record 2) create login record */
-    public registerUser(user: User, hash: string): User {
-        console.log("registerUser>1")
-//        return new Promise<User>((resolve, reject) => {
-            console.log("registerUser>2")
-//             this.connection.transaction(trx => {
-//                 console.log("registerUser>3")
-//                 this.addUser(user, trx) 
-//                     .then(()=> {
-//                         console.log("registerUser>4")
-//                        // return this.addLogin(user.email, hash, trx)
-//                         console.log("registerUser>5")
-//                     })
-//                     // .then(()=> {
-//                     //     console.log("registerUser>6")
-//                     //     return;
-//                     //     // resolve(user);
-//                     // })
-//                     .catch(error => {
-//                         console.log("registerUser>7")
-//                         // reject("error registering user")
-//                     })
-//             })
-//             .then(() => {
-//                 console.log("registerUser>8")
-//                 console.log("registerUser>transaction completed")
-//                 // resolve(user)
-//             })
-//             .catch(error => {
-//                 console.log("registerUser>9")
-//                 console.log("registerUser>error: " + error)
-//                 // reject("error registering user")
-//             })
-// //        })
-            return new User();
-    }
-
-    public async addUser(user: User): Promise<User> {
+    /** Creates a DB transaction around:
+     *  1) creating user record 
+     *  2) create login record 
+     **/
+    public async addUser(user: User, hash: string): Promise<User> {
 
         //https://stackoverflow.com/a/40852008/5719544
         //transform knex transaction such that can be used with async-await
         const promisify = (fn: any) => new Promise((resolve, reject) => fn(resolve));
-        const trx: any = await promisify(this.connection.transaction);
+        const trx: knex.Transaction  = <knex.Transaction> await promisify(this.connection.transaction);
 
         try {
-            let users: User [] = await trx.insert({
-                name: user.name,
-                email: user.email,
-                joined: new Date()})
-            .into(config.DB_TABLE_USER)
-            .returning("*")
+            let users: User [] = await trx
+                .insert({
+                    name: user.name,
+                    email: user.email,
+                    joined: new Date()})
+                .into(config.DB_TABLE_USER)
+                .returning("*")
+
+            await trx
+                .insert({
+                    email: user.email,
+                    hash
+                }).into(config.DB_TABLE_LOGIN)
+                .returning("email")
             await trx.commit();
             return Promise.resolve(users[0]);
         }
