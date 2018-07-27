@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 const Clarifai = require('clarifai');
 
+
 import * as config from "./config";
 import User from "./db/user";
 
