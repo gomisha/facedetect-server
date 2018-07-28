@@ -1,7 +1,7 @@
 import knex from "knex";
 
 import IConnection from "./IConnection";
-import * as config from "./config_db";
+import * as config from "../config";
 
 import User from "./user";
 
