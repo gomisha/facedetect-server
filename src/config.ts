@@ -1,3 +1,5 @@
+// end points
+
 export const ENDPOINT_GET_HOME = "/";
 
 export const ENDPOINT_GET_PROFILE = "/profile/:id";
@@ -15,3 +17,6 @@ export const ENDPOINT_PUT_IMAGE = "/image";
 
 export const CLARIFAI_KEY = "d8356d92cf6c41f3a7e2b499e23baa20"
 
+// server
+
+export const PORT = 3000;
