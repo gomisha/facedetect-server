@@ -15,18 +15,18 @@ export const ENDPOINT_PUT_IMAGE = "/image";
 
 // Clarifai
 
-export const CLARIFAI_KEY = "d8356d92cf6c41f3a7e2b499e23baa20"
+export const CLARIFAI_KEY = process.env.FD_CLARIFAI_KEY as string
 
 // server
 
-export const PORT = 3000;
+export const PORT = process.env.PORT || 3000;
 
 //database
 
-export const DB_TABLE_LOGIN = "fd_login";
-export const DB_TABLE_USER = "fd_users";
+export const DB_TABLE_LOGIN = process.env.FD_DB_TABLE_LOGIN as string;
+export const DB_TABLE_USER = process.env.FD_DB_TABLE_USER as string;
 
-export const DB_HOST = "stampy.db.elephantsql.com";
-export const DB_USER = "niqdgsog";
-export const DB_PASSWORD = "pVthToA_yOX2i7QS4ndFIzHL7hILRu08";
-export const DB_DATABASE = "niqdgsog";
+export const DB_HOST = process.env.FD_DB_HOST as string;
+export const DB_USER = process.env.FD_DB_USER as string;
+export const DB_PASSWORD = process.env.FD_DB_PASSWORD as string;
+export const DB_DATABASE = process.env.FD_DB_DATABASE as string;
