@@ -25,8 +25,10 @@ const clarify = new Clarifai.App({
 // for error: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 app.use(cors());
 
-app.listen(3000, ()=> {
-    console.log("server running on port 3000");
+let listenPort = process.env.PORT || config.PORT;
+
+app.listen(listenPort, ()=> {
+    console.log("server running on port " + listenPort);
 })
 
 // ***************** GET REQUESTS **********************************
